@@ -1,0 +1,50 @@
+---
+description: Mac Mini 本地环境信息 - 两个 OpenClaw 安装的区别与用途
+alwaysApply: true
+---
+
+# 本机 OpenClaw 环境
+
+Mac Mini 上有两个 OpenClaw，用途不同：
+
+## 1. CLI 全局安装（日常使用）
+
+- **位置**: `/usr/local/lib/node_modules/openclaw/`
+- **入口**: `openclaw`（全局命令）
+- **版本**: npm 发布的打包版
+- **用途**: 日常使用 Gateway、频道、助手等功能
+- **数据目录**: `~/.openclaw/`（配置、凭证、日志等）
+
+## 2. Cursor 源码项目（开发用）
+
+- **位置**: `/Users/dinglingyun/Desktop/OpenClaw/`
+- **入口**: `pnpm openclaw`（在项目目录内运行）
+- **版本**: 源码版，可修改
+- **用途**: 二次开发、修改代码、学习源码
+- **数据目录**: 共用同一个 `~/.openclaw/`
+
+## 插件白名单机制
+
+配置文件 `~/.openclaw/openclaw.json` 中的 `plugins.allow` 是插件白名单数组。**只有在白名单中的插件才会被加载**，即使 `plugins.entries` 里设置了 `enabled: true` 也不会生效。
+
+因此，安装或启用新插件时需要两步：
+1. 安装/启用插件：`openclaw plugins install <插件名>` 或 `openclaw plugins enable <插件ID>`
+2. 将插件 ID 加入 `plugins.allow` 数组（如果该数组存在）
+3. 重启 Gateway：`openclaw gateway restart`
+
+示例（`~/.openclaw/openclaw.json`）：
+```json
+"plugins": {
+  "allow": ["feishu", "memory-core"],  // 白名单，不在此列表中的插件不会加载
+  "entries": {
+    "feishu": { "enabled": true },
+    "memory-core": { "enabled": true }
+  }
+}
+```
+
+## 注意事项
+
+- 两者共用同一个 `~/.openclaw/` 数据目录，配置和凭证互通。
+- 开发调试时用 `pnpm openclaw`，日常使用时用全局 `openclaw` 命令。
+- 修改源码后需要 `pnpm build` 才能让 `pnpm openclaw` 反映变化。
